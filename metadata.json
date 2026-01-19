@@ -1,0 +1,8 @@
+
+{
+  "name": "MeowID - Feline Identification AI",
+  "description": "A high-fidelity cat breed identification app with AI-powered vision, detailed breed insights, and a personalized pet collection.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
