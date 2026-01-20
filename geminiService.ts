@@ -2,7 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CatBreed } from "./types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+const ai = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
 export const identifyCatBreed = async (base64Image: string): Promise<CatBreed> => {
   const prompt = "Identify the cat breed in this image and provide detailed characteristics. Return the result in a structured JSON format.";
