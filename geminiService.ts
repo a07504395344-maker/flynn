@@ -7,9 +7,11 @@ const ai = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 export const identifyCatBreed = async (base64Image: string): Promise<CatBreed> => {
   const prompt = "Identify the cat breed in this image and provide detailed characteristics. Return the result in a structured JSON format.";
   
-  const response = await ai.getGenerativeModel({ 
+  const model = ai.getGenerativeModel({ 
     model: 'gemini-1.5-flash' 
-  }).generateContent({
+  });
+
+  const response = await model.generateContent({
     contents: [
       {
         parts: [
