@@ -1,25 +1,16 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { CatBreed } from "../types";
 
-// 使用 import.meta.env 正确读取 Vercel 中的环境变量
-const ai = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
+// 正确读取 Vercel 环境变量
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(apiKey);
 
 export const identifyCatBreed = async (base64Image: string): Promise<CatBreed> => {
   const prompt = "Identify the cat breed in this image and provide detailed characteristics. Return the result in a structured JSON format.";
   
-  const model = ai.getGenerativeModel({ 
-    model: 'gemini-1.5-flash' 
-  });
-
-  const response = await model.generateContent({
-    contents: [
-      {
-        parts: [
-          { inlineData: { mimeType: 'image/jpeg', data: base64Image } },
-          { text: prompt }
-        ]
-      }
-    ],
+  // 使用更稳定的 1.5 flash 模型
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
     generationConfig: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -29,17 +20,27 @@ export const identifyCatBreed = async (base64Image: string): Promise<CatBreed> =
           description: { type: SchemaType.STRING },
           personality: { type: SchemaType.STRING },
           priceRange: { type: SchemaType.STRING },
-          affectionLevel: { type: SchemaType.NUMBER, description: "1-5 scale" },
-          energyLevel: { type: SchemaType.NUMBER, description: "1-100 scale" },
-          matchConfidence: { type: SchemaType.NUMBER, description: "1-100 scale" }
+          affectionLevel: { type: SchemaType.NUMBER },
+          energyLevel: { type: SchemaType.NUMBER },
+          matchConfidence: { type: SchemaType.NUMBER }
         },
         required: ["name", "description", "personality", "priceRange", "affectionLevel", "energyLevel", "matchConfidence"]
       }
     }
   });
 
-  const text = response.response.text();
-  const data = JSON.parse(text || "{}");
+  const result = await model.generateContent([
+    {
+      inlineData: {
+        mimeType: "image/jpeg",
+        data: base64Image
+      }
+    },
+    { text: prompt }
+  ]);
+
+  const response = await result.response;
+  const data = JSON.parse(response.text());
   
   return {
     ...data,
