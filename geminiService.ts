@@ -4,8 +4,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 const genAI = new GoogleGenerativeAI(apiKey);
 
-export const identifyCatBreed = async (base64Image: string): Promise<any> => {
-  // 2. 使用最稳定的模型名称
+export const identifyCatBreed = async (base64Image) => {
+  // 2. 使用最稳定的模型
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   
   const prompt = "Identify the cat breed. Return JSON with fields: name, description, personality, priceRange, affectionLevel, energyLevel, matchConfidence";
@@ -23,17 +23,19 @@ export const identifyCatBreed = async (base64Image: string): Promise<any> => {
   const response = await result.response;
   const text = response.text();
   
-  // 3. 增加一层保护，防止因为 AI 返回格式不对导致白屏
+  // 3. 容错处理
   try {
-    const data = JSON.parse(text.replace(/```json|```/g, ''));
+    const cleanedText = text.replace(/```json|```/g, '');
+    const data = JSON.parse(cleanedText);
     return {
       ...data,
       imageUrl: `data:image/jpeg;base64,${base64Image}`
     };
   } catch (e) {
+    console.error("Parse error:", e);
     return {
-      name: "识别中",
-      description: "请再试一次",
+      name: "识别失败",
+      description: "解析返回数据时出错，请重试",
       imageUrl: `data:image/jpeg;base64,${base64Image}`
     };
   }
