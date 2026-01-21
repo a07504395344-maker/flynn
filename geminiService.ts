@@ -1,6 +1,6 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { CatBreed } from "./types";
+import { CatBreed } from "../types";
 
 const ai = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
 
